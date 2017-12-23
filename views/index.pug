@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1 What's Hot
+  p Posts:
+    each post in topPosts
+      .panel.panel-info
+        .panel-heading #{post.title}
+        .panel-body #{post.url}
