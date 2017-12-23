@@ -1,9 +1,15 @@
 extends layout
 
 block content
-  h1 What's Hot
-  p Posts:
-    each post in topPosts
-      .panel.panel-info
-        .panel-heading #{post.title}
-        .panel-body #{post.url}
+  h1 What's Hot?
+    div.row
+        each sub in subs
+          div.col-sm-6
+            .panel.panel-info
+                .panel-heading 
+                    h2 r/#{sub.title}
+                .panel-body 
+                  each post in sub.posts
+                    h4 
+                      a(href=post.url) #{post.title}
+                

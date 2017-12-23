@@ -2,15 +2,15 @@ var express = require('express');
 var router = express.Router();
 var reddit = require('../bin/reddit.js');
 var res;
+var subs = ['Ripple', 'RequestNetwork', 'waltonchain', 'helloicon', 'IOTA', 'Lisk', 'omise_go', 'Stellar'];
 /* GET home page. */
 router.get('/', function(req, res, next) {
   this.res = res;
-  reddit('https://www.reddit.com/r/ripple/hot.json?limit=3', displayPosts);
-  
+  reddit(subs, displayPosts);
 });
 
-var displayPosts = function(topPosts) {
-  this.res.render('index', {topPosts:topPosts});
+var displayPosts = function(subs) {
+  this.res.render('index', {subs:subs});
 };
 
 module.exports = router;
