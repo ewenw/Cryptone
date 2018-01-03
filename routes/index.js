@@ -2,9 +2,11 @@ var express = require('express');
 var router = express.Router();
 var reddit = require('../bin/reddit.js');
 var getrequest = require('../bin/getrequest.js');
+var analyzer = require('../bin/analyzer.js');
 var res;
 var chartsData;
 var redditData;
+var analyzedData;
 
 // subreddits to scrape
 var subs = ['CryptoCurrency'];
@@ -41,7 +43,8 @@ router.get('/analyze', (req, res, next) => {
     console.log("Please use /update to retrieve the most recent data first");
   }
   else{
-    
+    analyzedData = analyzer(chartsData, redditData);
+    res.json(analyzedData);
   }
 });
 
