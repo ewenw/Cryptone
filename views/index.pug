@@ -10,6 +10,12 @@ block content
                     h2 r/#{sub.title}
                 .panel-body 
                   each post in sub.posts
-                    h4 
-                      a(href=post.url) #{post.title}
+                    div.row
+                      div.col-sm-6
+                        h4 
+                          a(href=post.url) #{post.title}
+                      div.col-sm-6
+                        a(href=post.url) 
+                          img.image(src=post.thumbnail width='60' height='60')
+                      
                 
