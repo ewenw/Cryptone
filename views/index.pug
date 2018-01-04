@@ -25,10 +25,13 @@ block content
                       tr
                         th 24hr Volume
                         th Market Cap
+                        th Rating
 
                       tr
                         td $#{coin["24h_volume_usd"].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                         td $#{coin.market_cap_usd.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                        td #{coin.rating}
+
     h4 Last updated #{timeStamp}
     p Developed by Ewen 2018
     a(class="github-button" href="https://github.com/ewenw/Cryptone" data-size="large" aria-label="Star ewenw/Cryptone on GitHub") Star

@@ -6,15 +6,28 @@ module.exports = (chartsData, redditData) => {
     console.log("Analyzing data...");
     chartsData.forEach((coinData) => {
         coinData.mentions = getMentions(coinData, redditData);
-        if (coinData.mentions > 0)
+        if (coinData.mentions > 0){
+            coinData.rating = getRating(coinData);
             tempData.push(coinData);
-        // console.log(coinData.name + " has " + coinData.mentions + " mentions recently.");
+        }
     });
     chartsData = tempData;
     chartsData.sort((a, b) => {
-        return b.mentions - a.mentions;
+        return b.rating - a.rating;
     });
     return chartsData;
+};
+
+const getRating = (coinData) => {
+    const percent_change_24h = parseInt(coinData.percent_change_24h);
+    const percent_change_1h = parseInt(coinData.percent_change_1h);
+    const mentions = coinData.mentions;
+    const market_cap_usd = coinData.market_cap_usd;
+
+    const avgPercentChange = (percent_change_24h + percent_change_1h) / 2;
+    const changeFactor = Math.log((avgPercentChange + 100) / 100);
+    const rating = Math.round(changeFactor * parseInt(mentions) / (Math.log(market_cap_usd) / 1000000000));
+    return rating;
 };
 
 const getMentions = (coinData, redditData) => {
