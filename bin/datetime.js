@@ -1,14 +1,13 @@
-var exports = {};
 exports.getTimeStamp = () => {
         return Date.now();
 };
 exports.formatDate = (timeStamp) => {
-        var date = new Date(timeStamp);
+        const date = new Date(timeStamp);
         return date.toString();
     };
 exports.hasExpired = (timeStamp, millis) => {
-        var now = Date.now();
-        var elapsed = now - timeStamp;
+        const now = Date.now();
+        const elapsed = now - timeStamp;
         if (elapsed > millis) {
             console.log("Timestamp: " + timeStamp +
                 " has expired by " + elapsed + " ms");
@@ -16,5 +15,5 @@ exports.hasExpired = (timeStamp, millis) => {
         }
         return false;
     };
-    
+
 module.exports = exports;

@@ -9,7 +9,7 @@ block content
           div.col-sm-4
             .panel.panel-info
                 .panel-heading 
-                    h3 #{coin.name} (#{coin.id})
+                    h3 #{coin.name} (#{coin.symbol})
                 .panel-body 
                     table(style="width:100%")
                       tr
@@ -30,5 +30,7 @@ block content
                         td $#{coin["24h_volume_usd"].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                         td $#{coin.market_cap_usd.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
     h4 Last updated #{timeStamp}
+    p Developed by Ewen 2018
+    a(class="github-button" href="https://github.com/ewenw/Cryptone" data-size="large" aria-label="Star ewenw/Cryptone on GitHub") Star
                       
                 

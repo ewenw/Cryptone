@@ -1,32 +1,33 @@
-var express = require('express');
-var router = express.Router();
-var reddit = require('../bin/reddit.js');
-var getrequest = require('../bin/getrequest.js');
-var analyzer = require('../bin/analyzer.js');
-var datetime = require('../bin/datetime.js');
-var fs = require('fs');
-var res;
-var chartsData;
-var redditData;
-var analyzedData;
+const express = require('express');
+const router = express.Router();
+const reddit = require('../bin/reddit.js');
+const getrequest = require('../bin/getrequest.js');
+const analyzer = require('../bin/analyzer.js');
+const datetime = require('../bin/datetime.js');
+const fs = require('fs');
+let res;
+let chartsData;
+let redditData;
+let analyzedData;
 
 
 // subreddits to scrape
-var SUBS = ['CryptoCurrency'];
+const SUBS = ['CryptoCurrency'];
 // url of top crypto charts
-var CHARTSURL = 'https://api.coinmarketcap.com/v1/ticker/';
-var DATAFILE = 'topcoins.json';
-var UPDATEINTERVAL = 500000;
+const CHARTSURL = 'https://api.coinmarketcap.com/v1/ticker/';
+const DATAFILE = 'topcoins.json';
+const UPDATEINTERVAL = 500000;
 
 
 router.get('/', (req, res, next) => {
-  initialize((data)=>{
+  initialize((data) => {
+    data.timeStamp = datetime.formatDate(data.timeStamp);
     res.render('index', data);
   });
 });
 
 router.get('/update', (req, res, next) => {
-  initialize(res.json);
+  initialize((data) => res.json(data));
 });
 
 router.get('/forceUpdate', (req, res, next) => {
@@ -34,10 +35,10 @@ router.get('/forceUpdate', (req, res, next) => {
     updateData().then((data) => {
       analyzeData(data);
       res.json(analyzedData);
-    });
+    }, (err) => {console.log(err);});
 });
 
-var initialize = (cb) => {
+const initialize = (cb) => {
   needsUpdate((result) => {
     if (result) {
     console.log("Updating data...");
@@ -54,7 +55,7 @@ var initialize = (cb) => {
   });
 }
 
-var needsUpdate = (cb) => {
+const needsUpdate = (cb) => {
   if (!analyzedData) {
     fs.readFile(DATAFILE, (err, data) => {
       if (err) {
@@ -71,8 +72,8 @@ var needsUpdate = (cb) => {
   }
 };
 
-var updateData = () => {
-  var requests = 0;
+const updateData = () => {
+  let requests = 0;
   return new Promise((resolve, reject) => {
     // update charts and subreddit data
     getrequest(CHARTSURL).then((response) => {
@@ -105,7 +106,7 @@ var updateData = () => {
   });
 };
 
-var analyzeData = (data, cb) => {
+const analyzeData = (data, cb) => {
   analyzedData = {
     timeStamp: data.timeStamp,
     data: analyzer(data.chartsData, data.redditData)

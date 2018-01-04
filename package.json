@@ -13,6 +13,7 @@
     "express": "~4.15.5",
     "morgan": "~1.9.0",
     "pug": "2.0.0-beta11",
+    "sentiment-analysis": "^0.1.2",
     "serve-favicon": "~2.4.5"
   }
 }

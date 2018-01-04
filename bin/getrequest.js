@@ -1,4 +1,4 @@
-var request = require('request');
+const request = require('request');
 
 module.exports = (url) => {
     return new Promise((resolve, reject) => {

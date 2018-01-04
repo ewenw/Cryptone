@@ -1,16 +1,19 @@
-var request = require('request');
-var getrequest = require('../bin/getrequest.js');
+const request = require('request');
+const getrequest = require('../bin/getrequest.js');
 
-var urlHost = 'https://www.reddit.com/r/'
-var urlRoute = '/hot.json?limit=';
-var numPosts = 500;
-var scoreMinimum = 3;
+const URLHOST = 'https://www.reddit.com/r/'
+const URLROUTE = '/hot.json?limit=';
 
-module.exports = function (urls) {
-    var responses = [];
-    var requestsLeft = urls.length;
+// max number of posts to retrieve
+const NUMPOSTS = 500;
+// minimum score of post / commment to be included
+const SCOREMIN = 3;
 
-    urls = urls.map((sub) => urlHost + sub + urlRoute + numPosts);
+module.exports = (urls) => {
+    let responses = [];
+    let requestsLeft = urls.length;
+
+    urls = urls.map((sub) => URLHOST + sub + URLROUTE + NUMPOSTS);
     return new Promise((resolve, reject) => {
         urls.forEach((url) => {
             request.get({
@@ -25,7 +28,6 @@ module.exports = function (urls) {
                 } else {
                     getTopPosts(data).then((data) => {
                         requestsLeft--;
-
                         responses.push(data);
                         if (requestsLeft == 0) {
                             console.log("Finished extracting posts from ", url);
@@ -35,21 +37,17 @@ module.exports = function (urls) {
                         console.log("Error ", err);
                     });
                 }
-
             });
         });
     });
 };
 
-var getTopPosts = function (data) {
-    var posts = data.data.children;
-    var topPosts;
-    var title;
-
+const getTopPosts = (data) => {
+    let posts = data.data.children;
+    console.log("Extracting " + posts.length + " posts...");
     return new Promise((resolve, reject) => {
         if (posts.length > 0) {
-
-            topPosts = {
+            const topPosts = {
                 title: posts[0].data.subreddit,
                 posts: []
             };
@@ -59,12 +57,12 @@ var getTopPosts = function (data) {
                 extractComments(p.data.url).then((data) => {
                     topPosts.posts.push(data);
                     postsLeft--;
-
                     if (postsLeft == 0) {
                         console.log("Finished extracting comments from top posts");
                         resolve(topPosts);
                     }
                 }, (err) => {
+                    console.log(err);
                     reject(err);
                 });
             });
@@ -72,38 +70,44 @@ var getTopPosts = function (data) {
     });
 };
 
-var extractComments = function (url) {
-    var comments = [];
+const extractComments = (url) => {
+    let comments = [];
 
     return new Promise((resolve, reject) => {
         getrequest(url + '.json?').then((response) => {
-            //console.log("Extracting comments from ", url);
+            console.log("Extracting comments from ", url);
             // append initial post
-            var initialPost = response[0].data.children[0];
-            comments.push({
-                comment: initialPost.data.body,
-                score: initialPost.data.score
-            });
+            if (response[0].data) {
+                const initialPost = response[0].data.children[0];
+                comments.push({
+                    comment: initialPost.data.body,
+                    score: initialPost.data.score
+                });
+            }
 
             // append comments
-            response[1].data.children.forEach((item) => {
-                var comment = item.data.body;
-                var score = item.data.score;
-                if (score >= scoreMinimum) {
-                    comments.push({
-                        comment: comment,
-                        score: score
-                    });
-                }
-            });
+            if (response[1].data) {
+                response[1].data.children.forEach((item) => {
+                    const comment = item.data.body;
+                    const score = item.data.score;
+                    if (score >= SCOREMIN) {
+                        comments.push({
+                            comment: comment,
+                            score: score
+                        });
+                    }
+                });
+            }
+            console.log("");
             resolve(comments);
         }, (err) => {
+            console.log(err);
             reject(err);
         });
     });
 };
 
-var applyFilters = function (post) {
+const applyFilters = (post) => {
     return post.data.distinguished !== 'moderator' &&
         post.data.title.toLowerCase().indexOf('daily') == -1 &&
         post.data.title.toLowerCase().indexOf('welcome') == -1 &&
