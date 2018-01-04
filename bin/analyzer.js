@@ -1,9 +1,13 @@
-module.exports = function (chartsData, redditData) {
+module.exports = (chartsData, redditData) => {
     // console.log(JSON.stringify(chartsData));
+    var tempData = [];
     chartsData.forEach((coinData) => {
         coinData.mentions = getMentions(coinData, redditData);
+        if(coinData.mentions > 0)
+            tempData.push(coinData);
         // console.log(coinData.name + " has " + coinData.mentions + " mentions recently.");
     });
+    chartsData = tempData;
     chartsData.sort((a, b) => {
         return b.mentions - a.mentions;
     });
@@ -23,8 +27,8 @@ var getMentions = (coinData, redditData) => {
                     loop:
                     for (var wordRaw of wordArray) {
                         var word = wordRaw.replace(/[^a-zA-Z ]/g, "");
-                        if (word === symbol || word === name) {
-                            mentions += commentPair.score;
+                        if (word != 'etc' && (word === symbol || word === name)) {
+                            mentions += Math.round(Math.log(commentPair.score));
                             break loop;
                         }
                     }

@@ -1,21 +1,34 @@
 extends layout
 
 block content
-  h1 What's Hot?
+  div.container
+    h1 What's Hot?
+    br
     div.row
-        each sub in subs
-          div.col-sm-6
+        each coin in data
+          div.col-sm-4
             .panel.panel-info
                 .panel-heading 
-                    h2 r/#{sub.title}
+                    h3 #{coin.name} (#{coin.id})
                 .panel-body 
-                  each post in sub.posts
-                    div.row
-                      div.col-sm-6
-                        h4 
-                          a(href=post.url) #{post.title}
-                      div.col-sm-6
-                        a(href=post.url) 
-                          img.image(src=post.thumbnail width='60' height='60')
+                    table(style="width:100%")
+                      tr
+                        th Popularity
+                        th 1hr 
+                        th 24hr
+                        
+                      tr
+                        td #{coin.mentions}
+                        td #{coin.percent_change_1h}%
+                        td #{coin.percent_change_24h}%
+                        
+                      tr
+                        th 24hr Volume
+                        th Market Cap
+
+                      tr
+                        td $#{coin["24h_volume_usd"].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                        td $#{coin.market_cap_usd.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+    h4 Last updated #{timeStamp}
                       
                 

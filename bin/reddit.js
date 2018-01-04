@@ -3,8 +3,8 @@ var getrequest = require('../bin/getrequest.js');
 
 var urlHost = 'https://www.reddit.com/r/'
 var urlRoute = '/hot.json?limit=';
-var numPosts = 120;
-var scoreMinimum = 5;
+var numPosts = 500;
+var scoreMinimum = 3;
 
 module.exports = function (urls) {
     var responses = [];

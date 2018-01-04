@@ -1,7 +1,7 @@
 var request = require('request');
 
-module.exports = function (url) {
-    return new Promise(function (resolve, reject) {
+module.exports = (url) => {
+    return new Promise((resolve, reject) => {
         request.get({
             url: url,
             json: true,

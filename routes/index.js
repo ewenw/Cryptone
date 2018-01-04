@@ -3,78 +3,117 @@ var router = express.Router();
 var reddit = require('../bin/reddit.js');
 var getrequest = require('../bin/getrequest.js');
 var analyzer = require('../bin/analyzer.js');
+var datetime = require('../bin/datetime.js');
+var fs = require('fs');
 var res;
 var chartsData;
 var redditData;
 var analyzedData;
 
-// subreddits to scrape
-var subs = ['CryptoCurrency'];
-// url of top crypto charts
-var chartsURL = 'https://api.coinmarketcap.com/v1/ticker/';
 
-/* GET home page. */
+// subreddits to scrape
+var SUBS = ['CryptoCurrency'];
+// url of top crypto charts
+var CHARTSURL = 'https://api.coinmarketcap.com/v1/ticker/';
+var DATAFILE = 'topcoins.json';
+var UPDATEINTERVAL = 500000;
+
+
 router.get('/', (req, res, next) => {
-  this.res = res;
-  reddit(subs, displayPosts);
+  initialize((data)=>{
+    res.render('index', data);
+  });
 });
 
 router.get('/update', (req, res, next) => {
-  // update charts and subreddit data
-  getrequest(chartsURL).then((response) => {
-    chartsData = response;
-  }, (error) => {
-    console.log("Error retrieving top charts ", error);
-  });
+  initialize(res.json);
+});
 
-  reddit(subs).then((response) => {
-    redditData = response;
-    res.json({
-      message: "Coins as of " + getDateTime(),
-      data: redditData
+router.get('/forceUpdate', (req, res, next) => {
+    console.log("Updating data...");
+    updateData().then((data) => {
+      analyzeData(data);
+      res.json(analyzedData);
     });
-  }, (error) => {
-    console.log("Error retrieving reddit comment ", error);
+});
+
+var initialize = (cb) => {
+  needsUpdate((result) => {
+    if (result) {
+    console.log("Updating data...");
+    updateData().then((data) => {
+      analyzeData(data);
+      cb(analyzedData);
+    },
+      (err) => { throw err; });
+  }
+  else {
+    console.log("Using existing data...");
+    cb(analyzedData);
+  }
   });
-});
+}
 
-router.get('/analyze', (req, res, next) => {
-  if (!chartsData || !redditData){
-    console.log("Please use /update to retrieve the most recent data first");
+var needsUpdate = (cb) => {
+  if (!analyzedData) {
+    fs.readFile(DATAFILE, (err, data) => {
+      if (err) {
+        cb(true);
+      }
+      else {
+        analyzedData = JSON.parse(data);
+        cb(false);
+      }
+    });
   }
-  else{
-    analyzedData = analyzer(chartsData, redditData);
-    res.json(analyzedData);
+  else {
+    cb(datetime.hasExpired(analyzedData.timeStamp, UPDATEINTERVAL));
   }
-});
-
-var displayPosts = function (subs) {
-  this.res.render('index', { subs: subs });
 };
 
-function getDateTime() {
+var updateData = () => {
+  var requests = 0;
+  return new Promise((resolve, reject) => {
+    // update charts and subreddit data
+    getrequest(CHARTSURL).then((response) => {
+      chartsData = response;
+      requests++;
+      if (requests == 2) {
+        resolve({
+          timeStamp: datetime.getTimeStamp(),
+          chartsData: chartsData,
+          redditData: redditData
+        });
+      }
+    }, (error) => {
+      reject("Error retrieving top charts " + error);
+    });
 
-  var date = new Date();
+    reddit(SUBS).then((response) => {
+      redditData = response;
+      requests++;
+      if (requests == 2) {
+        resolve({
+          timeStamp: datetime.getTimeStamp(),
+          chartsData: chartsData,
+          redditData: redditData
+        });
+      }
+    }, (error) => {
+      reject("Error retrieving reddit comments " + error);
+    });
+  });
+};
 
-  var hour = date.getHours();
-  hour = (hour < 10 ? "0" : "") + hour;
-
-  var min = date.getMinutes();
-  min = (min < 10 ? "0" : "") + min;
-
-  var sec = date.getSeconds();
-  sec = (sec < 10 ? "0" : "") + sec;
-
-  var year = date.getFullYear();
-
-  var month = date.getMonth() + 1;
-  month = (month < 10 ? "0" : "") + month;
-
-  var day = date.getDate();
-  day = (day < 10 ? "0" : "") + day;
-
-  return year + ":" + month + ":" + day + ":" + hour + ":" + min + ":" + sec;
-
-}
+var analyzeData = (data, cb) => {
+  analyzedData = {
+    timeStamp: data.timeStamp,
+    data: analyzer(data.chartsData, data.redditData)
+  };
+  fs.writeFile(DATAFILE, JSON.stringify(analyzedData, null, 2), (err) => {
+    if (err) throw err;
+    console.log('Analyzed data saved to ' + DATAFILE);
+  });
+};
 
 module.exports = router;
