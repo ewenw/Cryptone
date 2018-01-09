@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "set DEBUG=myapp:* & node ./bin/www",
     "stop": "taskkill -F -IM node.exe"
   },
   "dependencies": {
@@ -11,6 +11,7 @@
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.15.5",
+    "json2csv": "^3.11.5",
     "morgan": "~1.9.0",
     "pug": "2.0.0-beta11",
     "sentiment-analysis": "^0.1.2",

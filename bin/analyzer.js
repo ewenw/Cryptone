@@ -18,6 +18,11 @@ module.exports = (chartsData, redditData) => {
     return chartsData;
 };
 
+/**
+ * Rates the favorability of the coin based on coin data.
+ * @param {object} The coin's data with mentions added.
+ * @returns {number} The rating score as a number.
+ */
 const getRating = (coinData) => {
     const percent_change_24h = parseInt(coinData.percent_change_24h);
     const percent_change_1h = parseInt(coinData.percent_change_1h);
@@ -30,6 +35,10 @@ const getRating = (coinData) => {
     return rating;
 };
 
+/**
+ * Counts the number of mentions of a coin in each post / comment in the Reddit data.
+ * @param {string}
+ */
 const getMentions = (coinData, redditData) => {
     let mentions = 0;
     for (var subreddit of redditData) {

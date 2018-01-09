@@ -30,7 +30,7 @@ module.exports = (urls) => {
                         requestsLeft--;
                         responses.push(data);
                         if (requestsLeft == 0) {
-                            console.log("Finished extracting posts from ", url);
+                            // console.log("Finished extracting posts from ", url);
                             resolve(responses);
                         }
                     }, (err) => {
@@ -58,7 +58,7 @@ const getTopPosts = (data) => {
                     topPosts.posts.push(data);
                     postsLeft--;
                     if (postsLeft == 0) {
-                        console.log("Finished extracting comments from top posts");
+                        // console.log("Finished extracting comments from top posts");
                         resolve(topPosts);
                     }
                 }, (err) => {
@@ -75,7 +75,7 @@ const extractComments = (url) => {
 
     return new Promise((resolve, reject) => {
         getrequest(url + '.json?').then((response) => {
-            console.log("Extracting comments from ", url);
+            // console.log("Extracting comments from ", url);
             // append initial post
             if (response[0].data) {
                 const initialPost = response[0].data.children[0];
@@ -98,7 +98,7 @@ const extractComments = (url) => {
                     }
                 });
             }
-            console.log("");
+            // console.log("");
             resolve(comments);
         }, (err) => {
             console.log(err);

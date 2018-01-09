@@ -5,11 +5,12 @@ const getrequest = require('../bin/getrequest.js');
 const analyzer = require('../bin/analyzer.js');
 const datetime = require('../bin/datetime.js');
 const fs = require('fs');
+const logger = require('../bin/logger.js');
 let res;
 let chartsData;
 let redditData;
 let analyzedData;
-
+let timer;
 
 // subreddits to scrape
 const SUBS = ['CryptoCurrency'];
@@ -19,41 +20,63 @@ const DATAFILE = 'topcoins.json';
 const UPDATEINTERVAL = 500000;
 
 
-router.get('/', (req, res, next) => {
+
+router.get('/', (req, res) => {
   initialize((data) => {
     data.timeStamp = datetime.formatDate(data.timeStamp);
     res.render('index', data);
   });
 });
 
-router.get('/update', (req, res, next) => {
+router.get('/update', (req, res) => {
   initialize((data) => res.json(data));
 });
 
-router.get('/forceUpdate', (req, res, next) => {
-    console.log("Updating data...");
+router.get('/forceUpdate', (req, res) => {
+  console.log("Updating data...");
+  updateData().then((data) => {
+    analyzeData(data);
+    res.json(analyzedData);
+  }, (err) => { console.log(err); });
+});
+
+router.get('/log/:interval?', (req, res) => {
+  const interval = req.query.interval;
+  const analyze = () => {
     updateData().then((data) => {
       analyzeData(data);
-      res.json(analyzedData);
-    }, (err) => {console.log(err);});
+      logger(analyzedData);
+    });
+  };
+  console.log('Starting interval log... /stopLogging');
+  analyze();
+  timer = setInterval(() => {
+    console.log('Analyzing data...');
+    analyze();
+  }, parseInt(interval));
+});
+
+router.get('/stopLogging', (req, res) => {
+  console.log('Stopping the logger...');
+  clearInterval(timer);
 });
 
 const initialize = (cb) => {
   needsUpdate((result) => {
     if (result) {
-    console.log("Updating data...");
-    updateData().then((data) => {
-      analyzeData(data);
+      console.log("Updating data...");
+      updateData().then((data) => {
+        analyzeData(data);
+        cb(analyzedData);
+      },
+        (err) => { throw err; });
+    }
+    else {
+      console.log("Using existing data...");
       cb(analyzedData);
-    },
-      (err) => { throw err; });
-  }
-  else {
-    console.log("Using existing data...");
-    cb(analyzedData);
-  }
+    }
   });
-}
+};
 
 const needsUpdate = (cb) => {
   if (!analyzedData) {
